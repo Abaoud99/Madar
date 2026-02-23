@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>الجدولة المجمعة للفروض - المنصور الذهبي</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap" rel="stylesheet">
+    <style>
+        :root { --primary: #1e3a8a; --accent: #facc15; --bg: #f8fafc; }
+        
+        /* ضبط الحاوية الرئيسية لتوسيط البطاقة في قلب الشاشة أفقياً وعمودياً */
+        body { 
+            font-family: 'Cairo', sans-serif; 
+            background: var(--bg); 
+            margin: 0; 
+            padding: 20px; 
+            display: flex; 
+            justify-content: center; 
+            align-items: center; 
+            min-height: 100vh; 
+            box-sizing: border-box;
+        }
+        
+        /* الإطار الخارجي المتحرك */
+        .card-wrapper {
+            position: relative;
+            width: 100%;
+            max-width: 658px;
+            border-radius: 24px;
+            padding: 4px;
+            overflow: hidden;
+            display: flex;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            z-index: 0;
+        }
+
+        /* الألوان الأربعة التي تطوف حول الإطار */
+        .card-wrapper::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: conic-gradient(
+                #ef4444, 
+                #facc15, 
+                #10b981, 
+                #3b82f6, 
+                #ef4444  
+            );
+            animation: spin 4s linear infinite;
+            z-index: -1;
+        }
+
+        @keyframes spin {
+            100% { transform: rotate(360deg); }
+        }
+
+        /* البطاقة الأصلية */
+        .card { 
+            background: #fff; 
+            width: 100%; 
+            border-radius: 20px; 
+            overflow: hidden; 
+            z-index: 1; 
+        }
+
+        .header { 
+            background: linear-gradient(135deg, var(--primary), #1e40af); 
+            padding: 30px; 
+            text-align: center; 
+            color: white; 
+            border-bottom: 5px solid var(--accent); 
+        }
+        
+        /* تنسيق الشعار ليكون شفافاً ومتناسقاً فوق الأزرق */
+        .school-logo {
+            max-width: 500px; /* حجم متناسق لا يطغى على العنوان */
+            width: 100%; 
+            height: auto;
+            display: block;
+            margin: 0 auto 15px auto; /* توسيط الشعار مع ترك مسافة سفلية */
+            object-fit: contain;
+        }
+
+        .header h2 { margin: 0; color: var(--accent); font-weight: 900;}
+        .body-content { padding: 30px; }
+        label { display: block; margin-bottom: 8px; font-weight: bold; color: var(--primary); font-size: 0.9rem; }
+        .sub-label { font-size: 0.8rem; color: #64748b; margin-bottom: 4px; font-weight: 600; }
+        input, select { width: 100%; padding: 12px; border: 2px solid #e2e8f0; border-radius: 10px; margin-bottom: 20px; font-family: 'Cairo'; box-sizing: border-box; }
+        input:focus, select:focus { border-color: var(--primary); outline: none; }
+        
+        .btn { width: 100%; padding: 15px; background: var(--accent); color: var(--primary); border: none; border-radius: 10px; font-weight: bold; font-size: 1.1rem; cursor: pointer; transition: 0.3s; font-family: 'Cairo'; }
+        .btn:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(250, 204, 21, 0.4); }
+        .btn:disabled { background: #ccc; cursor: not-allowed; }
+        
+        .class-block { background: #f0f4f8; border: 2px dashed #cbd5e1; padding: 20px; border-radius: 12px; margin-bottom: 20px; position: relative; }
+        .class-block-title { font-weight: 900; color: var(--primary); margin-bottom: 15px; border-bottom: 2px solid #e2e8f0; padding-bottom: 10px; }
+        .remove-btn { position: absolute; top: 15px; left: 15px; background: #ef4444; color: white; border: none; padding: 5px 10px; border-radius: 6px; cursor: pointer; font-size: 0.8rem; font-family: 'Cairo'; }
+        .add-more-btn { background: #fff; color: var(--primary); border: 2px dashed var(--primary); padding: 12px; width: 100%; border-radius: 10px; font-family: 'Cairo'; font-weight: bold; cursor: pointer; margin-bottom: 20px; transition: 0.3s; }
+        .add-more-btn:hover { background: #eff6ff; }
+        
+        .exam-row { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 0; }
+        .exam-item { flex: 1; min-width: 45%; margin-bottom: 10px; }
+        #schedule-form { display: none; }
+        .teacher-badge { background: #eff6ff; padding: 15px; border-radius: 10px; margin-bottom: 20px; text-align: center; font-weight: bold; color: var(--primary); border: 1px solid #dbeafe; }
+    </style>
+</head>
+<body>
+
+<div class="card-wrapper">
+    <div class="card">
+        <div class="header">
+            <img src="dahbii.png" alt="شعار ثانوية المنصور الذهبي" class="school-logo">
+            <h2>جدولة الفروض الكتابية</h2>
+            <p style="margin:5px 0 0; opacity:0.9;">ثانوية المنصور الذهبي</p>
+        </div>
+
+        <div class="body-content">
+            <div id="auth-box">
+                <label>الرقم المهني (رقم التأجير)</label>
+                <input type="number" id="workId" placeholder="أدخل رقمك للولوج...">
+                <button class="btn" id="loginBtn" onclick="initApp()">تسجيل الدخول</button>
+                <p id="msg" style="color:red; text-align:center; display:none; margin-top: 10px; font-weight: bold;"></p>
+            </div>
+
+            <div id="schedule-form">
+                <div class="teacher-badge">أستاذ المادة: <span id="tName"></span></div>
+
+                <div class="exam-row">
+                    <div class="exam-item">
+                        <label>الأسدوس</label>
+                        <select id="semester"><option>الأسدوس الأول</option><option>الأسدوس الثاني</option></select>
+                    </div>
+                    <div class="exam-item">
+                        <label>المادة الدراسية</label>
+                        <select id="subject">
+                            <option>التربية الاسلامية</option><option>اللغة العربية</option><option>الاجتماعيات</option>
+                            <option>الرياضيات</option><option>علوم الحياة والأرض</option><option>العلوم الفيزيائية</option>
+                            <option>المعلوميات</option><option>الانجليزية</option><option>اللغة الفرنسية</option>
+                            <option>الفلسفة</option><option>التربية البدنية</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div style="border-top: 2px solid #e2e8f0; margin: 20px 0;"></div>
+
+                <div id="classes-container"></div>
+
+                <button class="add-more-btn" onclick="addClassBlock()">+ إضافة قسم آخر لجدولة فروضه</button>
+                <button class="btn" id="subBtn" onclick="submitSchedule()">حفظ الجدولة الزمنية لجميع الأقسام</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<template id="class-template">
+    <div class="class-block">
+        <div class="class-block-title">تواريخ القسم</div>
+        <button class="remove-btn" onclick="this.parentElement.remove()" style="display:none;">حذف القسم</button>
+        
+        <div class="exam-row" style="margin-bottom: 15px;">
+            <div class="exam-item">
+                <label>السلك</label>
+                <select class="level-select" onchange="updateClassesInBlock(this)">
+                    <option value="">-- اختر السلك --</option>
+                    <option value="إعدادي">إعدادي</option>
+                    <option value="تأهيلي">تأهيلي</option>
+                </select>
+            </div>
+            <div class="exam-item">
+                <label>القسم المستهدف</label>
+                <select class="class-name-select"><option>-- يرجى اختيار السلك --</option></select>
+            </div>
+        </div>
+
+        <label style="border-top: 1px solid #cbd5e1; padding-top: 10px;">تواريخ الفروض</label>
+        <div class="exam-row">
+            <div class="exam-item"><label class="sub-label">الأول</label><input type="date" class="ex1"></div>
+            <div class="exam-item"><label class="sub-label">الثاني</label><input type="date" class="ex2"></div>
+            <div class="exam-item"><label class="sub-label">الثالث</label><input type="date" class="ex3"></div>
+            <div class="exam-item"><label class="sub-label">الرابع</label><input type="date" class="ex4"></div>
+            <div class="exam-item" style="min-width: 100%;"><label class="sub-label">الخامس (إن وجد)</label><input type="date" class="ex5"></div>
+        </div>
+    </div>
+</template>
+
+<script>
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzWOCTAY95JqGNysJr-0tqM5jRXBi_xFbD6JSTAJCQ2TvP4nM5-HG0Xuypf4mbzvPI/exec"; 
+    let globalTeacher = "";
+    let prepClasses = [];
+    let qualClasses = [];
+    let blockCounter = 0;
+
+    function initApp() {
+        const id = document.getElementById('workId').value;
+        const btn = document.getElementById('loginBtn');
+        const msg = document.getElementById('msg');
+        if(!id) return;
+
+        btn.disabled = true; btn.innerText = "جاري تحميل البيانات...";
+        msg.style.display = 'none';
+
+        fetch(`${SCRIPT_URL}?action=verify&id=${id}`)
+        .then(res => res.json())
+        .then(data => {
+            if(data.success) {
+                globalTeacher = data.name;
+                document.getElementById('tName').innerText = data.name;
+                
+                fetch(`${SCRIPT_URL}?action=getClasses`)
+                .then(res => res.json())
+                .then(classes => {
+                    prepClasses = classes.prep; qualClasses = classes.qual;
+                    document.getElementById('auth-box').style.display = 'none';
+                    document.getElementById('schedule-form').style.display = 'block';
+                    addClassBlock(); 
+                });
+            } else {
+                msg.innerText = "الرقم المهني غير مسجل في قاعدة البيانات!";
+                msg.style.display = 'block';
+                btn.disabled = false; btn.innerText = "تسجيل الدخول";
+            }
+        });
+    }
+
+    function addClassBlock() {
+        blockCounter++;
+        const container = document.getElementById('classes-container');
+        const template = document.getElementById('class-template');
+        const clone = template.content.cloneNode(true);
+        
+        clone.querySelector('.class-block-title').innerText = "القسم رقم " + blockCounter;
+        if(blockCounter > 1) { clone.querySelector('.remove-btn').style.display = "block"; }
+        container.appendChild(clone);
+    }
+
+    function updateClassesInBlock(selectElement) {
+        const block = selectElement.closest('.class-block');
+        const classSelect = block.querySelector('.class-name-select');
+        const level = selectElement.value;
+        
+        classSelect.innerHTML = "";
+        let targetArray = level === "إعدادي" ? prepClasses : (level === "تأهيلي" ? qualClasses : []);
+        
+        targetArray.forEach(cls => {
+            let opt = document.createElement('option');
+            opt.value = cls; opt.innerText = cls;
+            classSelect.appendChild(opt);
+        });
+    }
+
+    function submitSchedule() {
+        const blocks = document.querySelectorAll('.class-block');
+        let classesArray = [];
+        
+        for(let block of blocks) {
+            const level = block.querySelector('.level-select').value;
+            const className = block.querySelector('.class-name-select').value;
+            if(!level || !className || className.includes("--")) {
+                alert("المرجو التأكد من تحديد السلك والقسم في جميع الخانات."); return;
+            }
+            classesArray.push({
+                level: level,
+                className: className,
+                exam1: block.querySelector('.ex1').value,
+                exam2: block.querySelector('.ex2').value,
+                exam3: block.querySelector('.ex3').value,
+                exam4: block.querySelector('.ex4').value,
+                exam5: block.querySelector('.ex5').value
+            });
+        }
+        
+        const btn = document.getElementById('subBtn');
+        btn.disabled = true; btn.innerText = "جاري بناء ومعالجة الجداول...";
+
+        const payload = {
+            teacherName: globalTeacher,
+            subject: document.getElementById('subject').value,
+            semester: document.getElementById('semester').value,
+            classesData: classesArray
+        };
+
+        fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify(payload) })
+        .then(res => res.text())
+        .then(msg => { alert(msg); location.reload(); })
+        .catch(err => {
+            alert("حدث خطأ في الاتصال. المرجو المحاولة مجدداً.");
+            btn.disabled = false; btn.innerText = "حفظ الجدولة الزمنية لجميع الأقسام";
+        });
+    }
+</script>
+</body>
+</html>

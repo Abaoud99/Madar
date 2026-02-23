@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>البوابة الرقمية - ثانوية المنصور الذهبي</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #1e3a8a; 
+            --accent: #facc15; 
+            --bg-base: #f1f5f9;
+            --text-main: #0f172a;
+            --text-muted: #475569;
+        }
+
+        body {
+            font-family: 'Cairo', sans-serif;
+            background-color: var(--bg-base);
+            margin: 0; padding: 20px;
+            display: flex; align-items: center; justify-content: center;
+            min-height: 100vh;
+            overflow-x: hidden; /* لمنع التمرير الأفقي بسبب الألوان الطافية */
+            position: relative;
+        }
+
+        /* --- الألوان الطافية في الخلفية --- */
+        .ambient-colors {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            z-index: -1;
+            overflow: hidden;
+            pointer-events: none; /* كي لا تعيق النقر على الأزرار */
+        }
+
+        .color-blob {
+            position: absolute;
+            filter: blur(90px);
+            border-radius: 50%;
+            opacity: 0.6;
+            animation: drift 15s infinite alternate ease-in-out;
+        }
+
+        .blob-1 { background: #3b82f6; width: 400px; height: 400px; top: -10%; right: -10%; animation-delay: 0s; }
+        .blob-2 { background: #facc15; width: 350px; height: 350px; bottom: -15%; left: -10%; animation-delay: -5s; }
+        .blob-3 { background: #10b981; width: 250px; height: 250px; top: 40%; left: 30%; animation-delay: -10s; }
+
+        @keyframes drift {
+            0% { transform: translate(0, 0) scale(1); }
+            33% { transform: translate(50px, -50px) scale(1.1); }
+            66% { transform: translate(-30px, 30px) scale(0.9); }
+            100% { transform: translate(0, 0) scale(1); }
+        }
+
+        /* --- الحاوية الرئيسية (تأثير الزجاج) --- */
+        .main-container {
+            width: 100%;
+            max-width: 600px;
+            border-radius: 24px;
+            overflow: hidden;
+            /* تأثير Glassmorphism */
+            background: rgba(255, 255, 255, 0.6);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.05);
+            z-index: 1;
+        }
+
+        /* الشعار العريض في القمة */
+        .header-logo {
+            width: 100%;
+            height: auto;
+            max-height: 180px;
+            display: block;
+            object-fit: contain; /* لضمان ظهور الشعار كاملاً دون اقتطاع */
+            padding: 15px 0; /* مساحة ليتنفس الشعار فوق الخلفية */
+            background: transparent;
+        }
+
+        .header-title {
+            padding: 20px;
+            text-align: center;
+            border-bottom: 2px solid rgba(226, 232, 240, 0.5);
+        }
+
+        .header-title h1 { margin: 0; font-size: 1.8rem; color: var(--primary); font-weight: 900; }
+        .header-title p { margin: 8px 0 0; font-size: 0.95rem; color: var(--text-muted); font-weight: 600; }
+
+        .portals-grid {
+            padding: 35px 30px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        /* --- تصميم الأزرار الجاذبة والبسيطة --- */
+        .portal-card {
+            display: block;
+            padding: 25px 20px;
+            text-align: center;
+            background: rgba(255, 255, 255, 0.7);
+            border: 1px solid rgba(255, 255, 255, 0.8);
+            border-radius: 16px;
+            text-decoration: none;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); /* حركة ارتدادية ناعمة */
+            position: relative;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.02);
+        }
+
+        /* تأثير التمرير (Hover) */
+        .portal-card:hover {
+            transform: translateY(-6px) scale(1.02);
+            background: #ffffff;
+            border-color: var(--primary);
+            box-shadow: 0 15px 30px rgba(30, 58, 138, 0.1);
+        }
+
+        .portal-card h2 {
+            margin: 0 0 8px 0;
+            font-size: 1.3rem;
+            color: var(--primary);
+            font-weight: 900;
+            transition: color 0.3s;
+        }
+
+        .portal-card p {
+            margin: 0;
+            font-size: 0.9rem;
+            color: var(--text-muted);
+            line-height: 1.6;
+        }
+
+        /* إضاءة خفيفة تظهر عند التمرير */
+        .portal-card::after {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0; height: 4px;
+            background: linear-gradient(90deg, var(--primary), var(--accent));
+            opacity: 0;
+            transition: opacity 0.3s;
+            border-radius: 16px 16px 0 0;
+        }
+
+        .portal-card:hover::after { opacity: 1; }
+
+        .footer {
+            text-align: center;
+            padding: 20px;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body>
+
+<div class="ambient-colors">
+    <div class="color-blob blob-1"></div>
+    <div class="color-blob blob-2"></div>
+    <div class="color-blob blob-3"></div>
+</div>
+
+<div class="main-container">
+    <img src="dahbi.png" alt="شعار ثانوية المنصور الذهبي" class="header-logo" onerror="this.src='https://via.placeholder.com/600x150/ffffff/1e3a8a?text=شعار+المؤسسة'">
+    
+    <div class="header-title">
+        <h1>منـصة مَــدَار</h1>
+        <p>فضاء الخدمات الإدارية والتربوية - ثانوية المنصور الذهبي</p>
+    </div>
+
+    <div class="portals-grid">
+        
+        <a href="abs_control.html" class="portal-card">
+            <h2>بوابة الرخص والتغيبات</h2>
+            <p>التوثيق الرقمي للغيابات والتأخرات، وإرفاق التبريرات الخاصة بالتقرير اليومي للإدارة بطريقة سلسة ومباشرة.</p>
+        </a>
+
+        <a href="exam_control.html" class="portal-card">
+            <h2>بوابة المراقبة المستمرة</h2>
+            <p>مسك وتخطيط تواريخ الفروض الكتابية لجميع الأقسام المسندة خلال الأسدوس في منصة مركزية واحدة.</p>
+        </a>
+
+        <a href="track_control.html" class="portal-card">
+            <h2>التتبع البيداغوجي</h2>
+            <p>البطاقة التقنية لتتبع تنفيذ البرنامج الدراسي وتوثيق إنجاز الدروس والفقرات بدقة واحترافية.</p>
+        </a>
+
+    </div>
+
+    <div class="footer">
+        جميع الحقوق محفوظة لثانوية المنصور الذهبي التأهيلية © 2026
+    </div>
+</div>
+
+</body>
+</html>

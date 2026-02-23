@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>تتبع البرنامج الدراسي المجمع</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap" rel="stylesheet">
+    <style>
+        /* تم تعديل اللون الأساسي ليطابق الأزرق الرصين الذي طلبته */
+        :root { --primary: #1e3a8a; --accent: #f59e0b; --bg: #f1f5f9; --box-bg: #ffffff; }
+        
+        /* توسيط البطاقة في قلب الشاشة */
+        body { 
+            font-family: 'Cairo', sans-serif; 
+            background: var(--bg); 
+            margin: 0; 
+            padding: 20px; 
+            display: flex; 
+            justify-content: center; 
+            align-items: center; 
+            min-height: 100vh; 
+            box-sizing: border-box;
+        }
+
+        /* الغلاف الخارجي المسؤول عن حركة الألوان المطاردة */
+        .card-wrapper {
+            position: relative;
+            width: 100%;
+            max-width: 708px;
+            border-radius: 24px;
+            padding: 4px;
+            overflow: hidden;
+            display: flex;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.15);
+            z-index: 0;
+            background: var(--bg); /* لضمان ظهور الفواصل شفافة بلون الخلفية */
+        }
+
+        /* الألوان المنفصلة التي يطارد بعضها بعضاً */
+        .card-wrapper::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: conic-gradient(
+                from 0deg, 
+                #ef4444 0deg 60deg, transparent 60deg 90deg, 
+                #facc15 90deg 150deg, transparent 150deg 180deg, 
+                #10b981 180deg 240deg, transparent 240deg 270deg, 
+                #3b82f6 270deg 330deg, transparent 330deg 360deg
+            );
+            animation: chase 3s linear infinite;
+            z-index: -1;
+        }
+
+        @keyframes chase {
+            100% { transform: rotate(360deg); }
+        }
+
+        /* البطاقة الأصلية */
+        .card { 
+            background: var(--box-bg); 
+            width: 100%; 
+            border-radius: 20px; 
+            overflow: hidden; 
+            z-index: 1; 
+        }
+
+        .header { background: linear-gradient(135deg, var(--primary), #1e40af); padding: 25px; text-align: center; color: white; border-bottom: 5px solid var(--accent); }
+        
+        /* تنسيق الشعار ليبرز فوق الأزرق */
+        .school-logo {
+            max-width: 500px;
+            width: 100%; 
+            height: auto;
+            display: block;
+            margin: 0 auto 15px auto;
+            object-fit: contain;
+        }
+
+        .header h2 { margin: 0; font-size: 1.4rem; }
+        .body-content { padding: 30px; }
+        label { display: block; margin-bottom: 8px; font-weight: bold; color: #334155; font-size: 0.85rem; }
+        input, select, textarea { width: 100%; padding: 10px; border: 2px solid #e2e8f0; border-radius: 10px; margin-bottom: 15px; font-family: 'Cairo'; box-sizing: border-box; }
+        input:focus, select:focus, textarea:focus { border-color: var(--primary); outline: none; }
+        .btn { width: 100%; padding: 15px; background: var(--primary); color: white; border: none; border-radius: 10px; font-weight: bold; font-size: 1.1rem; cursor: pointer; transition: 0.3s; }
+        .btn:hover { background: #1e40af; transform: translateY(-2px); }
+        .btn:disabled { background: #94a3b8; cursor: not-allowed; }
+        
+        /* تنسيق كتل الأقسام */
+        .class-block { background: #f8fafc; border: 2px dashed #cbd5e1; padding: 20px; border-radius: 12px; margin-bottom: 20px; position: relative; }
+        .class-block-title { font-weight: 900; color: var(--primary); margin-bottom: 15px; border-bottom: 2px solid #e2e8f0; padding-bottom: 10px; }
+        .remove-btn { position: absolute; top: 15px; left: 15px; background: #ef4444; color: white; border: none; padding: 5px 10px; border-radius: 6px; cursor: pointer; font-size: 0.8rem; font-family: 'Cairo'; }
+        .remove-btn:hover { background: #dc2626; }
+        
+        .add-more-btn { background: #eff6ff; color: var(--primary); border: 2px dashed #bfdbfe; padding: 12px; width: 100%; border-radius: 10px; font-family: 'Cairo'; font-weight: bold; cursor: pointer; margin-bottom: 20px; transition: 0.3s; }
+        .add-more-btn:hover { background: #dbeafe; }
+        
+        .grid-2 { display: flex; gap: 15px; }
+        .grid-2 > div { flex: 1; }
+        #form-section { display: none; }
+        .badge { background: #eff6ff; padding: 15px; border-radius: 10px; margin-bottom: 20px; border: 1px solid #bfdbfe; color: var(--primary); font-weight: bold; text-align: center; }
+    </style>
+</head>
+<body>
+
+<div class="card-wrapper">
+    <div class="card">
+        <div class="header">
+            <img src="dahbii.png" alt="شعار ثانوية المنصور الذهبي" class="school-logo">
+            <h2>البطاقة التقنية لتتبع الإنجاز</h2>
+            <p style="margin:5px 0 0; opacity:0.9; font-size:0.9rem;">إدخال مجمع للأقسام المسندة</p>
+        </div>
+
+        <div class="body-content">
+            <div id="auth-box">
+                <label>رقم التأجير المهني</label>
+                <input type="number" id="workId" placeholder="أدخل رقمك للتحقق...">
+                <button class="btn" id="loginBtn" onclick="initApp()">تسجيل الدخول</button>
+                <p id="msg" style="color:red; text-align:center; display:none; margin-top:10px; font-weight:bold;"></p>
+            </div>
+
+            <div id="form-section">
+                <div class="badge">الأستاذ(ة): <span id="tName"></span></div>
+
+                <div class="grid-2">
+                    <div>
+                        <label>الأسدوس</label>
+                        <select id="semester"><option>الأول</option><option>الثاني</option></select>
+                    </div>
+                    <div>
+                        <label>المادة الدراسية</label>
+                        <select id="subject">
+                            <option>التربية الاسلامية</option><option>اللغة العربية</option><option>الاجتماعيات</option>
+                            <option>الرياضيات</option><option>علوم الحياة والأرض</option><option>العلوم الفيزيائية</option>
+                            <option>المعلوميات</option><option>الانجليزية</option><option>اللغة الفرنسية</option>
+                            <option>الفلسفة</option><option>التربية البدنية</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div style="border-top: 2px solid #e2e8f0; margin: 20px 0;"></div>
+
+                <div id="classes-container"></div>
+
+                <button class="add-more-btn" onclick="addClassBlock()">+ إضافة قسم آخر</button>
+                
+                <button class="btn" id="subBtn" onclick="submitData()">توثيق الإنجاز لجميع الأقسام</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<template id="class-template">
+    <div class="class-block">
+        <div class="class-block-title">بيانات القسم</div>
+        <button class="remove-btn" onclick="this.parentElement.remove()" style="display:none;">إزالة القسم</button>
+        
+        <div class="grid-2">
+            <div>
+                <label>السلك</label>
+                <select class="level-select" onchange="updateClassesInBlock(this)">
+                    <option value="">-- اختر السلك --</option>
+                    <option value="إعدادي">إعدادي</option>
+                    <option value="تأهيلي">تأهيلي</option>
+                </select>
+            </div>
+            <div>
+                <label>القسم المستهدف</label>
+                <select class="class-name-select"><option>-- اختر السلك أولاً --</option></select>
+            </div>
+        </div>
+        <div class="grid-2">
+            <div><label>الدروس المقررة</label><input type="number" class="p-lessons" placeholder="مثال: 12"></div>
+            <div><label>المنجز منها</label><input type="number" class="c-lessons" placeholder="مثال: 5"></div>
+        </div>
+        <label>عنوان الدرس / الفقرة المنجزة</label>
+        <textarea class="l-title" rows="2" placeholder="المحور الثاني..."></textarea>
+        <label>تاريخ الإنجاز</label>
+        <input type="date" class="l-date">
+        <div class="grid-2">
+            <div><label>الفروض المقررة</label><input type="number" class="p-exams" placeholder="مثال: 3"></div>
+            <div><label>الفروض المنجزة</label><input type="number" class="c-exams" placeholder="مثال: 1"></div>
+        </div>
+    </div>
+</template>
+
+<script>
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxqEeOkV8Twi8HNasLwzL2le4U9TJNQFGR5p-rUuJKPdhk5EFSIc3mpCj3MQSC53PiXAA/exec"; 
+    let globalTeacher = ""; let globalWorkId = "";
+    let prepClasses = []; let qualClasses = [];
+    let blockCounter = 0;
+
+    function initApp() {
+        const id = document.getElementById('workId').value;
+        const btn = document.getElementById('loginBtn');
+        const msg = document.getElementById('msg');
+        if(!id) return;
+
+        btn.disabled = true; btn.innerText = "جاري الاتصال بقاعدة البيانات...";
+        msg.style.display = 'none';
+
+        fetch(`${SCRIPT_URL}?action=verify&id=${id}`)
+        .then(res => res.json())
+        .then(data => {
+            if(data.success) {
+                globalTeacher = data.name; globalWorkId = data.id;
+                document.getElementById('tName').innerText = data.name;
+                
+                fetch(`${SCRIPT_URL}?action=getClasses`)
+                .then(res => res.json())
+                .then(classes => {
+                    prepClasses = classes.prep; qualClasses = classes.qual;
+                    document.getElementById('auth-box').style.display = 'none';
+                    document.getElementById('form-section').style.display = 'block';
+                    addClassBlock(); 
+                });
+            } else {
+                msg.innerText = "رقم التأجير غير مدرج!"; msg.style.display = 'block';
+                btn.disabled = false; btn.innerText = "تسجيل الدخول";
+            }
+        });
+    }
+
+    function addClassBlock() {
+        blockCounter++;
+        const container = document.getElementById('classes-container');
+        const template = document.getElementById('class-template');
+        const clone = template.content.cloneNode(true);
+        
+        clone.querySelector('.class-block-title').innerText = "القسم رقم " + blockCounter;
+        if(blockCounter > 1) {
+            clone.querySelector('.remove-btn').style.display = "block";
+        }
+        container.appendChild(clone);
+    }
+
+    function updateClassesInBlock(selectElement) {
+        const block = selectElement.closest('.class-block');
+        const classSelect = block.querySelector('.class-name-select');
+        const level = selectElement.value;
+        
+        classSelect.innerHTML = "";
+        let targetArray = level === "إعدادي" ? prepClasses : (level === "تأهيلي" ? qualClasses : []);
+        
+        targetArray.forEach(cls => {
+            let opt = document.createElement('option');
+            opt.value = cls; opt.innerText = cls;
+            classSelect.appendChild(opt);
+        });
+    }
+
+    function submitData() {
+        const blocks = document.querySelectorAll('.class-block');
+        let classesArray = [];
+        
+        for(let block of blocks) {
+            const className = block.querySelector('.class-name-select').value;
+            if(!className || className.includes("--")) {
+                alert("يرجى التأكد من تحديد جميع الأقسام بشكل صحيح."); return;
+            }
+            classesArray.push({
+                className: className,
+                plannedLessons: block.querySelector('.p-lessons').value,
+                completedLessons: block.querySelector('.c-lessons').value,
+                lessonTitle: block.querySelector('.l-title').value,
+                lessonDate: block.querySelector('.l-date').value,
+                plannedExams: block.querySelector('.p-exams').value,
+                completedExams: block.querySelector('.c-exams').value
+            });
+        }
+        
+        const btn = document.getElementById('subBtn');
+        btn.disabled = true; btn.innerText = "جاري إرسال حزمة البيانات...";
+
+        const payload = {
+            workId: globalWorkId,
+            teacherName: globalTeacher,
+            semester: document.getElementById('semester').value,
+            subject: document.getElementById('subject').value,
+            classesData: classesArray 
+        };
+
+        fetch(SCRIPT_URL, { method: 'POST', body: JSON.stringify(payload) })
+        .then(res => res.text())
+        .then(msg => {
+            alert(msg);
+            location.reload();
+        }).catch(e => {
+            alert("حدث خطأ أثناء الاتصال بالخادم.");
+            btn.disabled = false; btn.innerText = "توثيق الإنجاز لجميع الأقسام";
+        });
+    }
+</script>
+</body>
+</html>
