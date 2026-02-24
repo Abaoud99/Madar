@@ -105,6 +105,28 @@
         .exam-item { flex: 1; min-width: 45%; margin-bottom: 10px; }
         #schedule-form { display: none; }
         .teacher-badge { background: #eff6ff; padding: 15px; border-radius: 10px; margin-bottom: 20px; text-align: center; font-weight: bold; color: var(--primary); border: 1px solid #dbeafe; }
+
+        /* تنسيق زر العودة للرئيسية */
+        .back-btn {
+            display: block;
+            text-align: center;
+            margin-top: 20px;
+            padding: 14px;
+            background: #f8fafc;
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 800;
+            border-radius: 10px;
+            border: 2px solid #e2e8f0;
+            transition: all 0.3s ease;
+            font-size: 0.95rem;
+            font-family: 'Cairo', sans-serif;
+        }
+        .back-btn:hover {
+            background: #eff6ff;
+            border-color: #bfdbfe;
+            transform: translateY(-2px);
+        }
     </style>
 </head>
 <body>
@@ -151,6 +173,9 @@
                 <button class="add-more-btn" onclick="addClassBlock()">+ إضافة قسم آخر لجدولة فروضه</button>
                 <button class="btn" id="subBtn" onclick="submitSchedule()">حفظ الجدولة الزمنية لجميع الأقسام</button>
             </div>
+
+            <a href="index.html" class="back-btn">⮐ العودة للرئيسية</a>
+
         </div>
     </div>
 </div>
