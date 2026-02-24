@@ -67,9 +67,9 @@
         /* معالجة الشعار المستطيل الكبير */
         .logo-rect {
             width: 100%;
-            max-width: 420px; /* التحكم في عرض الشعار المستطيل */
+            max-width: 420px; 
             height: auto;
-            max-height: 150px; /* منع الارتفاع المفرط */
+            max-height: 150px; 
             object-fit: contain;
             margin-bottom: 15px;
             filter: drop-shadow(0 2px 8px rgba(250, 204, 21, 0.4));
@@ -132,7 +132,29 @@
         .teacher-box { background: #eff6ff; padding: 12px; border-radius: 12px; margin-bottom: 20px; border: 1px solid #dbeafe; text-align: center; color: var(--primary-blue); font-weight: 700; }
         .row { display: flex; gap: 12px; }
         .row > div { flex: 1; }
-        .footer-text { text-align: center; margin-top: 20px; font-size: 0.7rem; color: #94a3b8; }
+        
+        /* تنسيق زر العودة للرئيسية */
+        .back-btn {
+            display: block;
+            text-align: center;
+            margin-top: 15px;
+            padding: 14px;
+            background: #f8fafc;
+            color: var(--primary-blue);
+            text-decoration: none;
+            font-weight: 800;
+            border-radius: 12px;
+            border: 2px solid #e2e8f0;
+            transition: all 0.3s ease;
+            font-size: 0.95rem;
+        }
+        .back-btn:hover {
+            background: #eff6ff;
+            border-color: #bfdbfe;
+            transform: translateY(-2px);
+        }
+
+        .footer-text { text-align: center; margin-top: 25px; font-size: 0.7rem; color: #94a3b8; }
     </style>
 </head>
 <body>
@@ -193,6 +215,8 @@
                 <button class="main-btn" id="subBtn" onclick="submitData()">إرسال التقرير النهائي</button>
             </div>
 
+            <a href="index.html" class="back-btn">⮐ العودة للرئيسية</a>
+
             <div class="footer-text">جميع الحقوق محفوظة لثانوية المنصور الذهبي © 2026</div>
         </div>
     </div>
@@ -201,7 +225,6 @@
 <script>
     const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzUnov2MIfKHuQ7lQZApt9f3ITWOIG7vSLAfTfrCvcNSUkNRqciM3sgO5o2fNWXIY0s/exec";
 
-    // توليد قائمة الساعات
     const times = ["08:30","09:30","10:30","11:30","12:30","14:30","15:30","16:30","17:30","18:30"];
     const fromS = document.getElementById('fromTime');
     const toS = document.getElementById('toTime');
@@ -220,7 +243,6 @@
         
         if(!id) return;
         
-        // تغيير حالة الزر لمنع النقر المكرر وإشعار المستخدم
         btn.disabled = true;
         btn.innerText = "جاري الدخول...";
         errHint.style.display = 'none';
@@ -261,7 +283,7 @@
             const d = {
                 teacherName: teacherNameStr,
                 subject: document.getElementById('subject').value,
-                duration: document.getElementById('duration').value, // إضافة خانة المدة
+                duration: document.getElementById('duration').value, 
                 fromTime: document.getElementById('fromTime').value,
                 toTime: document.getElementById('toTime').value,
                 fileData: e.target.result.split(',')[1],
